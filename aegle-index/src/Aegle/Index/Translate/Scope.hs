@@ -26,10 +26,15 @@ translateScope scopeInfo = do
     def <- getConstInfo aname
     translateDefinition def
   libName <- translateLibName <$> lookupModuleOrigin scopeInfo._scopeCurrent
-  reexports <- for (collectReexportNames scopeInfo) \(cname, aname) -> do
-    exportAs <- translateConcreteQName libName cname
-    canonicalName <- translateQName aname
-    pure TS.Export {..}
+  reexports <- forMaybe (collectReexportNames scopeInfo) \(cname, aname) -> do
+    def <- getConstInfo aname
+    indexable <- isIndexableDefinition def
+    if indexable
+      then do
+        exportAs <- translateConcreteQName libName cname
+        canonicalName <- translateQName aname
+        pure $ Just (TS.Export {..})
+      else pure Nothing
   let exports =
         fmap (\def -> TS.Export {canonicalName = def.name, exportAs = def.name}) definitions
           ++ reexports
