@@ -16,6 +16,7 @@ import Agda.Syntax.Scope.Base
 import Data.List.NonEmpty qualified as NE
 import Data.Map qualified as M
 import Data.Set qualified as S
+import Agda.Utils.Monad (ifNotM)
 
 --------------------------------------------------------------------------------
 
@@ -28,13 +29,10 @@ translateScope scopeInfo = do
   libName <- translateLibName <$> lookupModuleOrigin scopeInfo._scopeCurrent
   reexports <- forMaybe (collectReexportNames scopeInfo) \(cname, aname) -> do
     def <- getConstInfo aname
-    indexable <- isIndexableDefinition def
-    if indexable
-      then do
+    ifNotM (isIndexableDefinition def) (pure Nothing) do
         exportAs <- translateConcreteQName libName cname
         canonicalName <- translateQName aname
         pure $ Just (TS.Export {..})
-      else pure Nothing
   let exports =
         fmap (\def -> TS.Export {canonicalName = def.name, exportAs = def.name}) definitions
           ++ reexports
