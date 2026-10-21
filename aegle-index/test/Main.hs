@@ -43,7 +43,7 @@ tests = testGroup "Aegle.Index"
     silentLogger _ _ = pure ()
 
     allDefinitions :: [DB.LibraryFragment] -> [DB.Definition]
-    allDefinitions = concatMap (\f -> f.definitions)
+    allDefinitions = concatMap (.definitions)
 
     exportsFrom :: TS.ModuleName -> [DB.LibraryFragment] -> [DB.Export]
     exportsFrom name fragments =
