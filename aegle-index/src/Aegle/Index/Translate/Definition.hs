@@ -23,7 +23,7 @@ import Agda.Utils.Monad hiding (guard, unless)
 
 translateDefinition :: Definition -> Transl (Maybe TS.Definition)
 translateDefinition def = setCurrentRangeQ def.defName do
-  ifM (not <$> isIndexableDefinition def) (pure Nothing) case def.theDef of
+  ifNotM (isIndexableDefinition def) (pure Nothing) case def.theDef of
     AxiomDefn {} -> Just <$> translateToAxiom def
     AbstractDefn {} -> Just <$> translateToAxiom def
     FunctionDefn {} -> Just <$> translateFunDef def
