@@ -24,7 +24,7 @@ tests = testGroup "Aegle.Index"
         let definitions = allDefinitions fragments
             exports = exportsFrom "Reexports" fragments
             indexedNames = S.fromList $ map (\d -> d.name) definitions
-            exportedNames = map (\e -> e.exportAs.name) exports
+            exportedNames = map (.exportAs.name) exports
 
         -- ordinary reexports survive
         assert $ "zero" `elem` exportedNames
