@@ -23,7 +23,7 @@ tests = testGroup "Aegle.Index"
           Index.index (config fixture) silentLogger (Foldl.generalize Foldl.list)
         let definitions = allDefinitions fragments
             exports = exportsFrom "Reexports" fragments
-            indexedNames = S.fromList $ map (\d -> d.name) definitions
+            indexedNames = S.fromList $ map (.name) definitions
             exportedNames = map (.exportAs.name) exports
 
         -- ordinary reexports survive
