@@ -6,35 +6,34 @@ import Aegle.Database.Backend qualified as DB
 import Aegle.Index qualified as Index
 import Control.Foldl qualified as Foldl
 import Data.Set qualified as S
-import Hedgehog
 import Paths_aegle_index (getDataFileName)
 import Test.Tasty
-import Test.Tasty.Hedgehog
+import Test.Tasty.HUnit
 
 main :: IO ()
 main = defaultMain tests
 
 tests :: TestTree
 tests = testGroup "Aegle.Index"
-  [ testProperty "reexports refer to indexed definitions" $
-      withTests 1 $ property do
-        fixture <- evalIO $ getDataFileName "test/fixtures/reexports"
-        fragments <- evalIO $
-          Index.index (config fixture) silentLogger (Foldl.generalize Foldl.list)
-        let definitions = allDefinitions fragments
-            exports = exportsFrom "Reexports" fragments
-            indexedNames = S.fromList $ map (.name) definitions
-            exportedNames = map (.exportAs.name) exports
+  [ testCase "reexports refer to indexed definitions" do
+      fixture <- getDataFileName "test/fixtures/reexports"
+      fragments <-
+        Index.index (config fixture) silentLogger (Foldl.generalize Foldl.list)
 
-        -- ordinary reexports survive
-        assert $ "zero" `elem` exportedNames
-        assert $ "suc" `elem` exportedNames
-        -- erased reexports disappear
-        assert $ all (`notElem` exportedNames) ["lzero", "lsuc", "_⊔_", "Setω"]
-        -- remaining reexports have an indexed target
-        assert $ all
-          (\e -> e.canonicalName `S.member` indexedNames)
-          exports
+      let definitions = allDefinitions fragments
+          exports = exportsFrom "Reexports" fragments
+          indexedNames = S.fromList $ map (.name) definitions
+          exportedNames = map (.exportAs.name) exports
+
+      -- ordinary reexports survive
+      assertBool "zero should be exported" $ "zero" `elem` exportedNames
+      assertBool "suc should be exported" $ "suc" `elem` exportedNames
+      -- erased reexports disappear
+      assertBool "erased definitions should not be exported" $
+        all (`notElem` exportedNames) ["lzero", "lsuc", "_⊔_", "Setω"]
+      -- remaining reexports have an indexed target
+      assertBool "reexports should reference indexed definitions" $
+        all (\e -> e.canonicalName `S.member` indexedNames) exports
   ]
   where
     config fixture = Index.Config [Index.LibraryConfig Index.None fixture]

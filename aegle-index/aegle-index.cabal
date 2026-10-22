@@ -140,11 +140,10 @@ test-suite aegle-index-test
     , directory
     , filemanip
     , foldl
-    , hedgehog
     , prettyprinter
     , prettyprinter-ansi-terminal
     , tasty
-    , tasty-hedgehog
+    , tasty-hunit
     , text
   default-language: GHC2024
   if flag(debug)

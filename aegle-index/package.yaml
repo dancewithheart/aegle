@@ -108,6 +108,5 @@ tests:
       - aegle-index
       - containers
       - foldl
-      - hedgehog
       - tasty
-      - tasty-hedgehog
+      - tasty-hunit
